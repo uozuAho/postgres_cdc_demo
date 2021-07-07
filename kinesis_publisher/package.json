@@ -1,0 +1,14 @@
+{
+  "name": "kinesis_publisher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node publisher.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.6.0"
+  }
+}

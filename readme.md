@@ -6,6 +6,12 @@ be placed onto a kinesis stream, and processed by a derived data system - in
 this case, another postgres database that maintains a materialized view of data
 in the first database.
 
+# todo
+- publish replication logs to kinesis
+- error handling/monitoring
+  - a replication slot stores all messages not read by a client. Create
+    monitoring to show the size of the slot 'outbox'
+
 # Quick start
 
 ```sh
