@@ -19,12 +19,20 @@ docker-compose build
 docker-compose up -d
 # check 'truth' db is up and schema has been created
 docker exec db_truth psql -U postgres -d my_db -c 'select * from my_records;'
-# start interactive psql session with 'truth' db
-docker exec -it db_truth psql -U postgres -d my_db
 # create a logical replication slot
 docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --create-slot -P wal2json
-# stream changes to stdout, pretty printed by wal2json
+# start the kinesis publisher (just prints to console at the moment)
+cd kinesis_publisher && npm start
+# in another terminal, insert a record
+docker exec db_truth psql -U postgres -d my_db -c \
+  'insert into my_records values ('\''{"name": "Warwick", "age": 3}'\'');'
+# go back to the first terminal, and see the wal2json output!
+
+# alternatives/tests
+# start interactive psql session with 'truth' db
+docker exec -it db_truth psql -U postgres -d my_db
+# stream changes to stdout, pretty printed by wal2json (instead of kinesis publisher)
 docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --start -o pretty-print=1 \
   -o add-msg-prefixes=wal2json -f -
