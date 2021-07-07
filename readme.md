@@ -13,6 +13,7 @@ first database.
 # Quick start
 
 ```sh
+docker-compose build
 docker-compose up -d
 # prove 'truth' db is up and schema has been created
 docker exec db_truth psql -U postgres -d my_db -c 'select * from my_records;'
