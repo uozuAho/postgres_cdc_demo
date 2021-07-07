@@ -1,57 +1,34 @@
-// const { Client } = require('pg');
-
-// async function main() {
-//   const client = new Client({
-//     user: 'postgres',
-//     password: 'postgres',
-//     database: 'my_db'
-//   });
-//   await client.connect();
-//   const res = await client.query('SELECT $1::text as message', ['Hello world!']);
-//   console.log(res.rows[0].message);
-//   await client.end();
-// }
-
-// main()
-//   .then(_ => console.log('done'))
-//   .catch(e => {
-//     console.error('Unhandled exception:');
-//     console.error(e)
-//   });
-
 var LogicalReplication = require('pg-logical-replication');
-// var PluginTestDecoding = LogicalReplication.LoadPlugin('output/test_decoding');
 
-//Connection parameter : https://github.com/brianc/node-postgres/wiki/Client#parameters
-var connInfo = {
+var truthDbConnection = {
   user: 'postgres',
   password: 'postgres',
   database: 'my_db'
 };
 
-//Initialize with last LSN value
+function processWalRecord(record) {
+  const record_obj = JSON.parse(record);
+  console.log(JSON.stringify(record_obj, null, 2));
+  // todo: output to kinesis here
+}
+
 var lastLsn = null;
 
-var stream = (new LogicalReplication(connInfo))
+var stream = (new LogicalReplication(truthDbConnection))
   .on('data', function(msg) {
     lastLsn = msg.lsn || lastLsn;
-
     var log = (msg.log || '').toString('utf8');
-    try {
-      console.log(log);
-      //TODO: DO SOMETHING. eg) replicate to other dbms(pgsql, mysql, ...)
-    } catch (e) {
-      console.trace(log, e);
-    }
+    processWalRecord(log);
   }).on('error', function(err) {
-    console.trace('Error #2', err);
+    console.error('Error processing replication data:');
+    console.error(err);
     setTimeout(proc, 1000);
   });
 
 (function proc() {
   stream.getChanges('test_slot', lastLsn, {
-    includeXids: false, //default: false
-    includeTimestamp: false, //default: false
+    includeXids: false,
+    includeTimestamp: false,
   }, function(err) {
     if (err) {
       console.trace('Logical replication initialize error', err);
