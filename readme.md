@@ -1,16 +1,24 @@
 # Postgres change data capture (CDC) using Kinesis
 
-Change data capture (CDC) is a way to extract data changes from a data system in
-a streaming fashion. In this case, the data system is postgres. The changes will
-be placed onto a kinesis stream, and processed by a derived data system - in
-this case, another postgres database that maintains a materialized view of data
-in the first database.
+A demonstration of CDC usage - maintaining an up-to-date materialized view of a
+document-oriented database. Uses postgres, wal2json, nodejs & kinesis.
+
+Work in progress!
+
+Change data capture (CDC) is a way to extract data changes from a system of
+record in a streaming fashion. In this case, the system of record is postgres,
+with a table that stores records in json document format. The changes will be
+placed onto a kinesis stream, and processed by a derived data system - in this
+case, another postgres database that maintains a materialized, tabular view of
+the data in the system of record.
+
 
 # todo
 - publish replication logs to kinesis
 - error handling/monitoring
   - a replication slot stores all messages not read by a client. Create
     monitoring to show the size of the slot 'outbox'
+
 
 # Quick start
 
@@ -37,6 +45,20 @@ docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --start -o pretty-print=1 \
   -o add-msg-prefixes=wal2json -f -
 ```
+
+
+# How it works
+```
+┌─────────────────────┐             ┌───────────────────┐
+│                     │             │                   │
+│ postgres 'truth db' │             │ kinesis publisher │
+│ logical replication │             │ nodejs            │
+│ enabled, using      ├─────────────►                   │
+│ wal2json            │  replication│                   │
+│                     │  stream     │                   │
+└─────────────────────┘  (json)     └───────────────────┘
+```
+
 
 # References
 - [debezium: logical decoding output plugin installation for postgres](https://debezium.io/documentation/reference/postgres-plugins.html)
