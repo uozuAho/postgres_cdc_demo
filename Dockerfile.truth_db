@@ -1,0 +1,9 @@
+FROM postgres:13
+
+RUN apt-get update \
+  && apt-get install postgresql-13-wal2json
+
+COPY postgresql.conf.sample /usr/share/postgresql/postgresql.conf.sample
+
+# Copy the script which will initialize the replication permissions
+COPY /docker-entrypoint-initdb.d /docker-entrypoint-initdb.d

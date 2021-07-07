@@ -2,7 +2,9 @@ version: '3'
 services:
   db_source_of_truth:
     container_name: db_truth
-    image: "postgres"
+    build:
+      context: .
+      dockerfile: ./Dockerfile.truth_db
     ports:
       - "5432:5432"
     volumes:
