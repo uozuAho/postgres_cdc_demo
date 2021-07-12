@@ -15,12 +15,14 @@ the data in the system of record.
 
 # todo
 - publish replication logs to kinesis
+  - work in progress: run the publisher, look at errors
 - error handling/monitoring
   - a replication slot stores all messages not read by a client. Create
     monitoring to show the size of the slot 'outbox'
 
 
 # Quick start
+Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
 ```sh
 docker-compose build
@@ -30,14 +32,18 @@ docker exec db_truth psql -U postgres -d my_db -c 'select * from my_records;'
 # create a logical replication slot
 docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --create-slot -P wal2json
+# create a kinesis stream
+aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name Foo --shard-count 1
 # start the kinesis publisher (just prints to console at the moment)
 cd kinesis_publisher && npm start
 # in another terminal, insert a record
 docker exec db_truth psql -U postgres -d my_db -c \
   'insert into my_records values ('\''{"name": "Warwick", "age": 3}'\'');'
 # go back to the first terminal, and see the wal2json output!
+```
 
-# alternatives/tests
+Alternatives / tests
+```sh
 # start interactive psql session with 'truth' db
 docker exec -it db_truth psql -U postgres -d my_db
 # stream changes to stdout, pretty printed by wal2json (instead of kinesis publisher)

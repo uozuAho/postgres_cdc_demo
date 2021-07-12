@@ -1,4 +1,5 @@
 var LogicalReplication = require('pg-logical-replication');
+const { KinesisClient, AddTagsToStreamCommand } = require("@aws-sdk/client-kinesis");
 
 var truthDbConnection = {
   user: 'postgres',
@@ -6,19 +7,26 @@ var truthDbConnection = {
   database: 'my_db'
 };
 
-function processWalRecord(record) {
+const kinesisClient = new KinesisClient({ region: "ap-southeast-2" });
+
+async function processWalRecord(record) {
   const record_obj = JSON.parse(record);
   console.log(JSON.stringify(record_obj, null, 2));
-  // todo: output to kinesis here
+  const params = {
+    message: 'yo'
+  };
+  // nup, wrong command. how to send a message? PutRecordCommand?
+  const command = new AddTagsToStreamCommand(params);
+  const kResponse = await kinesisClient.send(command);
 }
 
 var lastLsn = null;
 
 var stream = (new LogicalReplication(truthDbConnection))
-  .on('data', function(msg) {
+  .on('data', async function(msg) {
     lastLsn = msg.lsn || lastLsn;
     var log = (msg.log || '').toString('utf8');
-    processWalRecord(log);
+    await processWalRecord(log);
   }).on('error', function(err) {
     console.error('Error processing replication data:');
     console.error(err);

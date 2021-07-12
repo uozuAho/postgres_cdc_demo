@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-kinesis": "^3.21.0",
     "pg": "^8.6.0",
     "pg-logical-replication": "^1.1.0"
   }
