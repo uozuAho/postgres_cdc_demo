@@ -14,13 +14,21 @@ the data in the system of record.
 
 
 # todo
-- publish replication logs to kinesis
-- error handling/monitoring
-  - a replication slot stores all messages not read by a client. Create
-    monitoring to show the size of the slot 'outbox'
+- ensure language is consistent. event, message, record
+- consumer: write to db
+- docs: system diagram
+- consumer: handle expired shard iterators
+- investigate fault behaviour of each node, eg.
+  - what happens when source db crashes/restarts. publisher? consumer? derived
+    data DB?
+- investigate load behaviour
+  - what's the bottleneck?
+  - how does the system behave when it is overloaded?
+- how to handle schema changes?
 
 
 # Quick start
+Install the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
 ```sh
 docker-compose build
@@ -30,14 +38,20 @@ docker exec db_truth psql -U postgres -d my_db -c 'select * from my_records;'
 # create a logical replication slot
 docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --create-slot -P wal2json
-# start the kinesis publisher (just prints to console at the moment)
+# create a kinesis stream (localstack may take some time to start. wait a bit.)
+aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name Foo --shard-count 1
+# start the kinesis publisher
 cd kinesis_publisher && npm start
+# in another terminal, start the kinesis consumer (just prints to console at the moment)
+cd kinesis_consumer && npm start
 # in another terminal, insert a record
 docker exec db_truth psql -U postgres -d my_db -c \
   'insert into my_records values ('\''{"name": "Warwick", "age": 3}'\'');'
-# go back to the first terminal, and see the wal2json output!
+# go to the consumer terminal, and see the wal2json output!
+```
 
-# alternatives/tests
+Alternatives / tests
+```sh
 # start interactive psql session with 'truth' db
 docker exec -it db_truth psql -U postgres -d my_db
 # stream changes to stdout, pretty printed by wal2json (instead of kinesis publisher)

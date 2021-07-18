@@ -1,0 +1,14 @@
+{
+  "name": "kinesis_consumer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node consumer.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-kinesis": "^3.21.0"
+  }
+}
