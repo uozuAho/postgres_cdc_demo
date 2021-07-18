@@ -32,12 +32,15 @@ async function getKinesisRecords() {
   const command = new GetRecordsCommand({
     ShardIterator: shardIterator
   });
-  const response = await kinesisClient.send(command);
+  return await kinesisClient.send(command);
+}
+
+function processKinesisRecords(response) {
   for (const record of response.Records) {
     console.log("read record!");
     console.log(record);
-    shardIterator = response.NextShardIterator;
   }
+  shardIterator = response.NextShardIterator;
 }
 
 async function runConsumerLoop() {
@@ -45,7 +48,8 @@ async function runConsumerLoop() {
     if (!shardIterator) {
       shardIterator = await getLatestShardIterator();
     }
-    await getKinesisRecords();
+    const records = await getKinesisRecords();
+    processKinesisRecords(records);
     await sleep(1000);
   }
 }
