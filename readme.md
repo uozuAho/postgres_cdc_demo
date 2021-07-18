@@ -14,11 +14,14 @@ the data in the system of record.
 
 
 # todo
-- publish replication logs to kinesis
-  - work in progress: run the publisher, look at errors
-- error handling/monitoring
-  - a replication slot stores all messages not read by a client. Create
-    monitoring to show the size of the slot 'outbox'
+- consumer: increment iterator on read
+- investigate fault behaviour of each node, eg.
+  - what happens when source db crashes/restarts. publisher? consumer? derived
+    data DB?
+- investigate load behaviour
+  - what's the bottleneck?
+  - how does the system behave when it is overloaded?
+- how to handle schema changes?
 
 
 # Quick start
@@ -32,10 +35,12 @@ docker exec db_truth psql -U postgres -d my_db -c 'select * from my_records;'
 # create a logical replication slot
 docker exec db_truth pg_recvlogical \
   -U postgres -d my_db --slot test_slot --create-slot -P wal2json
-# create a kinesis stream
+# create a kinesis stream (localstack may take some time to start. wait a bit.)
 aws --endpoint-url=http://localhost:4566 kinesis create-stream --stream-name Foo --shard-count 1
-# start the kinesis publisher (just prints to console at the moment)
+# start the kinesis publisher
 cd kinesis_publisher && npm start
+# in another terminal, start the kinesis consumer (just prints to console at the moment)
+cd kinesis_consumer && npm start
 # in another terminal, insert a record
 docker exec db_truth psql -U postgres -d my_db -c \
   'insert into my_records values ('\''{"name": "Warwick", "age": 3}'\'');'

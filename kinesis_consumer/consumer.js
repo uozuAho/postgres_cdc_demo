@@ -10,6 +10,10 @@ const kinesisClient = new KinesisClient({
 
 let shardIterator = null;
 
+async function sleep(ms) {
+  await new Promise((resolve, reject) => setTimeout(_ => resolve(), ms));
+}
+
 async function runConsumerLoop() {
   while (true) {
     if (!shardIterator) {
@@ -29,5 +33,9 @@ async function runConsumerLoop() {
       console.log("read record!");
       console.log(record);
     }
+    await sleep(1000);
+    // console.log('moo');
   }
 }
+
+runConsumerLoop().then(_ => console.log('consumer done'));
