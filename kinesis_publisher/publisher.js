@@ -32,11 +32,11 @@ async function processWalRecord(record) {
     console.log('writing record:');
     printWalRecord(record);
   }
-  encode(record);
+  const message = encode(record);
   const command = new PutRecordCommand({
     PartitionKey: 'asdf',  // don't care about partitioning for this demo
     StreamName: 'Foo',
-    Data: Buffer.from(record)
+    Data: Buffer.from(message)
   });
   await kinesisClient.send(command);
 }

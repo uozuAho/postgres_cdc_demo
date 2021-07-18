@@ -14,6 +14,7 @@ the data in the system of record.
 
 
 # todo
+- ensure language is consistent. event, message, record
 - consumer: write to db
 - investigate fault behaviour of each node, eg.
   - what happens when source db crashes/restarts. publisher? consumer? derived
