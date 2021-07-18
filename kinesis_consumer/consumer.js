@@ -1,7 +1,9 @@
 const {
   KinesisClient,
   GetRecordsCommand,
-  GetShardIteratorCommand
+  GetShardIteratorCommand,
+  GetRecordsCommandOutput,
+  _Record
 } = require("@aws-sdk/client-kinesis");
 
 const kinesisClient = new KinesisClient({
@@ -35,9 +37,14 @@ async function getKinesisRecords(shardIterator) {
   const command = new GetRecordsCommand({
     ShardIterator: shardIterator
   });
-  return await kinesisClient.send(command);
+  const response = await kinesisClient.send(command);
+  return response;
 }
 
+/**
+ * Process the given kinesis records
+ * @param {_Record[]} records
+ */
 function processKinesisRecords(records) {
   for (const record of records) {
     console.log("read record!");
