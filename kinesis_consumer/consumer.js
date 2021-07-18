@@ -32,6 +32,7 @@ async function runConsumerLoop() {
     for (const record of response.Records) {
       console.log("read record!");
       console.log(record);
+      shardIterator = response.NextShardIterator;
     }
     await sleep(1000);
     // console.log('moo');
