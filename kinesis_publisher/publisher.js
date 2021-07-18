@@ -27,18 +27,30 @@ function encode(walRecord) {
   return new TextEncoder('utf-8').encode(walRecord);
 }
 
+/**
+ * Publish a message to Kinesis
+ * @param {string} message
+ */
+async function publish(message) {
+  const command = new PutRecordCommand({
+    PartitionKey: 'asdf',
+    StreamName: 'Foo',
+    Data: Buffer.from(message)
+  });
+  await kinesisClient.send(command);
+}
+
+/**
+ * Do something with a wal2json output
+ * @param {string} record JSON output of wal2json
+ */
 async function processWalRecord(record) {
   if (DEBUG) {
     console.log('writing record:');
     printWalRecord(record);
   }
   const message = encode(record);
-  const command = new PutRecordCommand({
-    PartitionKey: 'asdf',  // don't care about partitioning for this demo
-    StreamName: 'Foo',
-    Data: Buffer.from(message)
-  });
-  await kinesisClient.send(command);
+  await publish(message);
 }
 
 var lastLsn = null;
