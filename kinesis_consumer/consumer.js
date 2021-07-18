@@ -6,6 +6,9 @@ const {
   _Record
 } = require("@aws-sdk/client-kinesis");
 
+const KINESIS_STREAM_NAME = 'Foo';
+const KINESIS_SHARD_ID = 'shardId-000000000000';
+
 const kinesisClient = new KinesisClient({
   endpoint: 'http://localhost:4566',
 });
@@ -20,8 +23,8 @@ async function sleep(ms) {
  */
 async function getLatestShardIterator() {
   const command = new GetShardIteratorCommand({
-    StreamName: 'Foo',
-    ShardId: 'shardId-000000000000',
+    StreamName: KINESIS_STREAM_NAME,
+    ShardId: KINESIS_SHARD_ID,
     ShardIteratorType: 'LATEST'
   });
   const response = await kinesisClient.send(command);

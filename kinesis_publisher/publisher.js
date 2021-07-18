@@ -2,6 +2,7 @@ var LogicalReplication = require('pg-logical-replication');
 const { KinesisClient, PutRecordCommand } = require("@aws-sdk/client-kinesis");
 
 const DEBUG = true;
+const KINESIS_STREAM_NAME = 'Foo';
 
 var truthDbConnection = {
   user: 'postgres',
@@ -33,8 +34,8 @@ function encode(walRecord) {
  */
 async function publish(message) {
   const command = new PutRecordCommand({
-    PartitionKey: 'asdf',
-    StreamName: 'Foo',
+    PartitionKey: 'asdf', // required parameter. don't care about partitioning for this demo
+    StreamName: KINESIS_STREAM_NAME,
     Data: Buffer.from(message)
   });
   await kinesisClient.send(command);
