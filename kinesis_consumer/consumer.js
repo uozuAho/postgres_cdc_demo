@@ -28,7 +28,7 @@ async function getLatestShardIterator() {
   return response.ShardIterator;
 }
 
-async function getKinesisRecords() {
+async function getKinesisRecords(shardIterator) {
   const command = new GetRecordsCommand({
     ShardIterator: shardIterator
   });
@@ -48,7 +48,7 @@ async function runConsumerLoop() {
     if (!shardIterator) {
       shardIterator = await getLatestShardIterator();
     }
-    const records = await getKinesisRecords();
+    const records = await getKinesisRecords(shardIterator);
     processKinesisRecords(records);
     await sleep(1000);
   }
