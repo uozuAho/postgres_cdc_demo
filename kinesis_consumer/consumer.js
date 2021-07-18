@@ -26,6 +26,11 @@ async function getLatestShardIterator() {
   return response.ShardIterator;
 }
 
+/**
+ * Get records starting at the given iterator.
+ * @param {string} shardIterator Iterator to start reading records from
+ * @returns {Promise<GetRecordsCommandOutput>}
+ */
 async function getKinesisRecords(shardIterator) {
   const command = new GetRecordsCommand({
     ShardIterator: shardIterator
