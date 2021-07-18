@@ -48,7 +48,8 @@ async function getKinesisRecords(shardIterator) {
 function processKinesisRecords(records) {
   for (const record of records) {
     console.log("read record!");
-    console.log(record);
+    const message = new TextDecoder('utf-8').decode(record.Data);
+    console.log(message);
   }
 }
 

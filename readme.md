@@ -14,7 +14,6 @@ the data in the system of record.
 
 
 # todo
-- consumer: make message human readable
 - investigate fault behaviour of each node, eg.
   - what happens when source db crashes/restarts. publisher? consumer? derived
     data DB?
