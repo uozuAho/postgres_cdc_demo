@@ -8,15 +8,13 @@ const kinesisClient = new KinesisClient({
   endpoint: 'http://localhost:4566',
 });
 
-let shardIterator = null;
-
 async function sleep(ms) {
   await new Promise((resolve, reject) => setTimeout(_ => resolve(), ms));
 }
 
 /**
  * Get the latest shard iterator from Kinesis
- * @returns {string} shard iterator value
+ * @returns {Promise<string>} shard iterator value
  */
 async function getLatestShardIterator() {
   const command = new GetShardIteratorCommand({
@@ -35,21 +33,23 @@ async function getKinesisRecords(shardIterator) {
   return await kinesisClient.send(command);
 }
 
-function processKinesisRecords(response) {
-  for (const record of response.Records) {
+function processKinesisRecords(records) {
+  for (const record of records) {
     console.log("read record!");
     console.log(record);
   }
-  shardIterator = response.NextShardIterator;
 }
 
 async function runConsumerLoop() {
+  let shardIterator = null;
+
   while (true) {
     if (!shardIterator) {
       shardIterator = await getLatestShardIterator();
     }
-    const records = await getKinesisRecords(shardIterator);
-    processKinesisRecords(records);
+    const response = await getKinesisRecords(shardIterator);
+    processKinesisRecords(response.Records);
+    shardIterator = response.NextShardIterator;
     await sleep(1000);
   }
 }
