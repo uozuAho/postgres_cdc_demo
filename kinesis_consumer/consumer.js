@@ -14,16 +14,24 @@ async function sleep(ms) {
   await new Promise((resolve, reject) => setTimeout(_ => resolve(), ms));
 }
 
+/**
+ * Get the latest shard iterator from Kinesis
+ * @returns {string} shard iterator value
+ */
+async function retrieveLatestShardIterator() {
+  const command = new GetShardIteratorCommand({
+    StreamName: 'Foo',
+    ShardId: 'shardId-000000000000',
+    ShardIteratorType: 'LATEST'
+  });
+  const response = await kinesisClient.send(command);
+  return response.ShardIterator;
+}
+
 async function runConsumerLoop() {
   while (true) {
     if (!shardIterator) {
-      const command = new GetShardIteratorCommand({
-        StreamName: 'Foo',
-        ShardId: 'shardId-000000000000',
-        ShardIteratorType: 'LATEST'
-      });
-      const response = await kinesisClient.send(command);
-      shardIterator = response.ShardIterator;
+      shardIterator = await retrieveLatestShardIterator();
     }
     const command = new GetRecordsCommand({
       ShardIterator: shardIterator
@@ -35,7 +43,6 @@ async function runConsumerLoop() {
       shardIterator = response.NextShardIterator;
     }
     await sleep(1000);
-    // console.log('moo');
   }
 }
 
