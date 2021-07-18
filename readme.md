@@ -47,7 +47,7 @@ cd kinesis_consumer && npm start
 # in another terminal, insert a record
 docker exec db_truth psql -U postgres -d my_db -c \
   'insert into my_records values ('\''{"name": "Warwick", "age": 3}'\'');'
-# go back to the first terminal, and see the wal2json output!
+# go to the consumer terminal, and see the wal2json output!
 ```
 
 Alternatives / tests
